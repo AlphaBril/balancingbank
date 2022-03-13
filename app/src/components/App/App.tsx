@@ -33,7 +33,7 @@ const App: React.FC = () => {
     <Layout>
       <Header>
         <Typography.Title style={{ color: "#aaaaaa" }}>
-          CLEAN-APP
+          BALANCING-BANK
         </Typography.Title>
       </Header>
       <Content className={styles.content}>
