@@ -5,7 +5,7 @@ import { UploadOutlined } from "@ant-design/icons";
 
 const Display: React.FC<{ message: string }> = (props) => {
   const upload = {
-    action: "https://www.localhost:3001/upload",
+    action: "http://www.localhost:3001/api/upload",
     onChange({ file, fileList }: { file: any; fileList: any }) {
       if (file.status !== "uploading") {
         console.log(file, fileList);
