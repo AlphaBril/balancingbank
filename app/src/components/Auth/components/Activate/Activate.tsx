@@ -3,18 +3,18 @@ import { useAuthentication } from "src/ducks/authentication/actions/authenticati
 import { useNavigation } from "src/ducks/navigation/navigation";
 
 const Activate: React.FC = () => {
-  const { activateUser } = useAuthentication();
-  const { pushState } = useNavigation();
+    const { activateUser } = useAuthentication();
+    const { pushState } = useNavigation();
 
-  useEffect(() => {
-    const path = window.location.pathname.split("/");
+    useEffect(() => {
+        const path = window.location.pathname.split("/");
 
-    if (path.length === 4) {
-      activateUser(path[3]);
-    } else pushState("/auth");
-  }, [activateUser, pushState]);
+        if (path.length === 4) {
+            activateUser(path[3]);
+        } else pushState("/auth");
+    }, [activateUser, pushState]);
 
-  return <></>;
+    return <></>;
 };
 
 export default Activate;

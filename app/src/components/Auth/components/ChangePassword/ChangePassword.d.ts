@@ -1,4 +1,4 @@
 export interface FormData {
-  password: string;
-  confirmPassword: string;
+    password: string;
+    confirmPassword: string;
 }

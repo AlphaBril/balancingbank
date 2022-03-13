@@ -9,14 +9,14 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "src/utils/i18n/i18n";
 
 ReactDOM.render(
-  // <React.StrictMode>
-  <I18nextProvider i18n={i18n}>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </I18nextProvider>,
-  // </React.StrictMode>,
-  document.getElementById("root")
+    // <React.StrictMode>
+    <I18nextProvider i18n={i18n}>
+        <Provider store={store}>
+            <App />
+        </Provider>
+    </I18nextProvider>,
+    // </React.StrictMode>,
+    document.getElementById("root")
 );
 
 // If you want your app to work offline and load faster, you can change

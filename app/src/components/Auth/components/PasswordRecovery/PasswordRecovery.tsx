@@ -6,48 +6,48 @@ import { useAuthentication } from "src/ducks/authentication/actions/authenticati
 import { FormData } from "./PasswordRecovery.d";
 
 const PasswordRecovery: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  const { passwordRecovery } = useAuthentication();
-  const { t } = useTranslation("authentication");
+    const { passwordRecovery } = useAuthentication();
+    const { t } = useTranslation("authentication");
 
-  const handlePasswordRecovery = (values: FormData) => {
-    setLoading(true);
-    passwordRecovery(values.email);
-    setLoading(false);
-  };
+    const handlePasswordRecovery = (values: FormData) => {
+        setLoading(true);
+        passwordRecovery(values.email);
+        setLoading(false);
+    };
 
-  return (
-    <Row justify="center" align="middle">
-      <Form
-        style={{ margin: "16px 0" }}
-        name="signup"
-        onFinish={handlePasswordRecovery}
-      >
-        <Form.Item
-          label={t("email")}
-          name="email"
-          rules={[
-            {
-              required: true,
-              message: t("email_missing"),
-              type: "email",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+    return (
+        <Row justify="center" align="middle">
+            <Form
+                style={{ margin: "16px 0" }}
+                name="signup"
+                onFinish={handlePasswordRecovery}
+            >
+                <Form.Item
+                    label={t("email")}
+                    name="email"
+                    rules={[
+                        {
+                            required: true,
+                            message: t("email_missing"),
+                            type: "email",
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
 
-        <Form.Item>
-          <Spin spinning={loading}>
-            <Button type="primary" htmlType="submit">
-              {t("recover password")}
-            </Button>
-          </Spin>
-        </Form.Item>
-      </Form>
-    </Row>
-  );
+                <Form.Item>
+                    <Spin spinning={loading}>
+                        <Button type="primary" htmlType="submit">
+                            {t("recover password")}
+                        </Button>
+                    </Spin>
+                </Form.Item>
+            </Form>
+        </Row>
+    );
 };
 
 export default PasswordRecovery;
