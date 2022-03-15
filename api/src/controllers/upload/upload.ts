@@ -18,7 +18,7 @@ const parsePageContent = (pages: readonly string[]) => {
                 const tmp = line[2].trim();
                 const split = tmp.split(" ");
                 item.type = split[0];
-                if (line[3] !== ".") {
+                if (line[3] !== "." && tmp[tmp.length - 1] !== ".") {
                     item.libelle = tmp.slice(0, tmp.length - 8);
                     item.date = tmp.slice(tmp.length - 8);
                 } else {
@@ -36,43 +36,67 @@ const parsePageContent = (pages: readonly string[]) => {
                     item.type = split[0] + " " + split[1];
                 }
                 item.value = line[3];
-                item.info = line[4] && line[4] !== "\n" ? line[4].trim() : null;
+                if (
+                    line[4] &&
+                    (line[4].includes("SOLDE") || line[4].includes("TOTAUX"))
+                ) {
+                    const newItem = <LCL>{};
+                    if (line[4].includes("SOLDE")) {
+                        item.info = line[4].slice(0, line[4].indexOf("SOLDE"));
+                        item.info = item.info === "\n" ? null : item.info;
+                        newItem.line = line[4].slice(line[4].indexOf("SOLDE"));
+                        newItem.value = newItem.line.slice(
+                            newItem.line.search(/\d/)
+                        );
+                        newItem.libelle = newItem.line
+                            .slice(
+                                0,
+                                newItem.line.length - newItem.value.length
+                            )
+                            .trim();
+                        newItem.type = "SOLDE";
+                    } else {
+                        item.info = line[4].slice(0, line[4].indexOf("TOTAUX"));
+                        item.info = item.info === "\n" ? null : item.info;
+                        newItem.line = line[4].slice(line[4].indexOf("TOTAUX"));
+                        newItem.type = "TOTAUX";
+                    }
+                } else {
+                    item.info =
+                        line[4] && line[4] !== "\n" ? line[4].trim() : null;
+                }
                 result.push(item);
             }
         }
     }
-    console.log(result);
+    return result;
 };
 
 export const upload = async (req: request, res: response) => {
+    console.log("COUCOU");
     try {
+        let info;
+        console.log(req.file);
+        console.log(req.body);
         if (req.file) {
             const dataBuffer = fs.readFileSync(req.file.path);
-            PdfData.extract(dataBuffer, {
+            const data = await PdfData.extract(dataBuffer, {
                 sort: true,
                 verbosity: VerbosityLevel.ERRORS,
                 get: {
                     pages: true,
                     text: true,
                 },
-            }).then((data) => {
-                if (data.text) {
-                    parsePageContent(data.text);
-                    // for (const page of data.text) {
-                    //     fs.writeFileSync("./public/test", page, {
-                    //         encoding: "utf8",
-                    //         flag: "a+",
-                    //         mode: 0o666,
-                    //     });
-                    // } write for test purpose
-                }
-                console.log(data.pages);
+            });
+            if (data.text) {
+                info = parsePageContent(data.text);
                 if (req.file) {
                     fs.unlinkSync(req.file.path);
                 }
-            });
+            }
         }
-        return res.json({ message: "success" });
+        console.log(info);
+        return res.status(200).json({ info });
     } catch (e) {
         return internalError(res)(e);
     }
