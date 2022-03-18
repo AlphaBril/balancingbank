@@ -17,7 +17,8 @@ const UPLOAD_ENDPOINT = "/api/upload";
 
 const testUpload = (dispatch: AppDispatch, res: AxiosResponse) => {
     const upload: UploadState = {
-        value: res.data,
+        creditCard: res.data.creditCard,
+        payment: res.data.payment,
         status: "success",
     };
     dispatch(setUpload(upload));
@@ -29,7 +30,7 @@ const handleError = (dispatch: AppDispatch, error: AxiosError) => {
     dispatch(setMessage(message));
 };
 
-const uploadPDF = (files: FormData, dispatch: AppDispatch) =>
+const uploadPDF = (files: FormData, dispatch: AppDispatch) => {
     axios.post(`${API_URL}${UPLOAD_ENDPOINT}`, files).then(
         (res) => {
             testUpload(dispatch, res);
@@ -38,6 +39,7 @@ const uploadPDF = (files: FormData, dispatch: AppDispatch) =>
             handleError(dispatch, error);
         }
     );
+};
 
 export const useUpload = () =>
     useAppSelector((state: RootState) => state.upload);

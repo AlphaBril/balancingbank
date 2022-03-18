@@ -4,6 +4,13 @@ import fs = require("fs");
 import { PdfData, VerbosityLevel } from "pdfdataextract";
 import { LCL } from "./upload.d";
 
+interface Filtered {
+    name: string;
+    values: string[];
+    dates: string[];
+    occurence: number;
+}
+
 const parsePageContent = (pages: readonly string[]) => {
     const result = <LCL[]>[];
     for (const page of pages) {
@@ -21,6 +28,11 @@ const parsePageContent = (pages: readonly string[]) => {
                 if (line[3] !== "." && tmp[tmp.length - 1] !== ".") {
                     item.libelle = tmp.slice(0, tmp.length - 8);
                     item.date = tmp.slice(tmp.length - 8);
+                    const lastDate = item.libelle.match(/(.*?)\d\d\/\d\d/);
+                    item.libelle =
+                        lastDate && lastDate[1]
+                            ? lastDate[1].trim()
+                            : item.libelle;
                 } else {
                     item.value =
                         split[split.length - 3] === ""
@@ -30,6 +42,11 @@ const parsePageContent = (pages: readonly string[]) => {
                         .slice(0, tmp.length - item.value.length)
                         .trim();
                     item.libelle = tmp2.slice(0, tmp2.length - 8);
+                    const lastDate = item.libelle.match(/(.*?)\d\d\/\d\d/);
+                    item.libelle =
+                        lastDate && lastDate[1]
+                            ? lastDate[1].trim()
+                            : item.libelle;
                     item.date = tmp2.slice(tmp2.length - 8);
                 }
                 if (item.type === "VIR") {
@@ -73,11 +90,10 @@ const parsePageContent = (pages: readonly string[]) => {
 };
 
 export const upload = async (req: request, res: response) => {
-    console.log("COUCOU");
     try {
-        let info;
+        const creditCard = <Filtered[]>[];
+        const payment = <Filtered[]>[];
         console.log(req.file);
-        console.log(req.body);
         if (req.file) {
             const dataBuffer = fs.readFileSync(req.file.path);
             const data = await PdfData.extract(dataBuffer, {
@@ -89,14 +105,52 @@ export const upload = async (req: request, res: response) => {
                 },
             });
             if (data.text) {
-                info = parsePageContent(data.text);
+                const results = parsePageContent(data.text);
+                for (const result of results.filter((el) => el.type === "CB")) {
+                    const exist = creditCard.find(
+                        (el) => el.name === result.libelle
+                    );
+                    if (!exist) {
+                        const newInfo = {
+                            name: result.libelle,
+                            values: [result.value],
+                            dates: [result.date],
+                            occurence: 1,
+                        };
+                        creditCard.push(newInfo);
+                    } else {
+                        exist.values.push(result.value);
+                        exist.dates.push(result.date);
+                        exist.occurence = exist.occurence + 1;
+                    }
+                }
+
+                for (const result of results.filter((el) => el.type !== "CB")) {
+                    const exist = payment.find(
+                        (el) => el.name === result.libelle
+                    );
+                    if (!exist) {
+                        const newInfo = {
+                            name: result.libelle,
+                            values: [result.value],
+                            dates: [result.date],
+                            occurence: 1,
+                        };
+                        payment.push(newInfo);
+                    } else {
+                        exist.values.push(result.value);
+                        exist.dates.push(result.date);
+                        exist.occurence = exist.occurence + 1;
+                    }
+                }
                 if (req.file) {
                     fs.unlinkSync(req.file.path);
                 }
             }
         }
-        console.log(info);
-        return res.status(200).json({ info });
+        creditCard.sort((a, b) => b.occurence - a.occurence);
+        payment.sort((a, b) => b.occurence - a.occurence);
+        return res.status(200).json({ creditCard, payment });
     } catch (e) {
         return internalError(res)(e);
     }

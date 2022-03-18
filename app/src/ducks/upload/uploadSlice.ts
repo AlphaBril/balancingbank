@@ -1,22 +1,21 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface LCL {
-    line: string;
-    date: string;
-    libelle: string;
-    type: string;
-    value: string;
-    credit: boolean;
-    info: string | null;
+interface Filtered {
+    name: string;
+    values: string[];
+    dates: string[];
+    occurence: number;
 }
 
 export interface UploadState {
-    value: LCL[];
+    creditCard: Filtered[];
+    payment: Filtered[];
     status: "success" | "error" | "info" | "";
 }
 
 const initialState: UploadState = {
-    value: [],
+    creditCard: [],
+    payment: [],
     status: "",
 };
 
@@ -25,11 +24,13 @@ export const uploadSlice = createSlice({
     initialState,
     reducers: {
         setUpload: (state, action: PayloadAction<UploadState>) => {
-            state.value = action.payload.value;
+            state.creditCard = action.payload.creditCard;
+            state.payment = action.payload.payment;
             state.status = action.payload.status;
         },
         clearUpload: (state) => {
-            state.value = initialState.value;
+            state.creditCard = initialState.creditCard;
+            state.payment = initialState.payment;
             state.status = initialState.status;
         },
     },

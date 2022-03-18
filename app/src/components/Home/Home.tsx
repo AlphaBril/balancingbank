@@ -1,10 +1,18 @@
 import React from "react";
-import DisplayComponent from "./components/Display/Display";
+import { useUpload } from "src/ducks/upload/actions/upload";
+import DemoMix from "./components/Display/Display";
+import UploadComponent from "./components/Upload/Upload";
 
 const Home: React.FC = () => {
+    const uploaded = useUpload();
+    console.log(uploaded);
     return (
         <>
-            <DisplayComponent message={"BONJOUR"}></DisplayComponent>
+            {uploaded.creditCard.length > 0 ? (
+                <DemoMix></DemoMix>
+            ) : (
+                <UploadComponent message={"BONJOUR"}></UploadComponent>
+            )}
         </>
     );
 };
